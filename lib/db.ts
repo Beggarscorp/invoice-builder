@@ -1,15 +1,13 @@
 import mysql from "mysql2/promise";
 
 export async function connectDB() {
-  const db = await mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: "",
-    database: "invoice_db", // ⚠️ CHECK THIS NAME
-  });
+  const url = process.env.DATABASE_URL;
 
-  const [rows] = await db.execute("SELECT DATABASE() as db");
-  console.log("CONNECTED DB:", rows);
+  // console.log("DATABASE_URL:", url); // 👈 debug
 
-  return db;
+  if (!url) {
+    throw new Error("DATABASE_URL not found");
+  }
+
+  return await mysql.createConnection(url);
 }
