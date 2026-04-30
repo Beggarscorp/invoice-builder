@@ -7,6 +7,7 @@ export default function DebugPage() {
       <p>DB_USER: {process.env.DB_USER}</p>
       <p>DB_NAME: {process.env.DB_NAME}</p>
       <p>DB_PORT: {process.env.DB_PORT}</p>
+      <p>DB_PORT: {process.env.DB_PORT}</p>
     </div>
   );
 }
