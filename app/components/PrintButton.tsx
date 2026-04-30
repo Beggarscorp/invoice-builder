@@ -6,7 +6,7 @@ export default function PrintButton() {
       onClick={() => window.print()}
       className="btn-primary mt-6"
     >
-      Print
+      Print Invoice
     </button>
   );
 }

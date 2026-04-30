@@ -1,13 +1,10 @@
+export const dynamic = "force-dynamic";
+
 import { connectDB } from "@/lib/db";
 import PrintButton from "../../components/PrintButton";
 
 export default async function InvoicePage({ params }: any) {
-  const resolvedParams = await params;
-  const id = resolvedParams?.id;
-
-  if (!id) {
-    return <div className="p-10 text-red-500">Invalid ID</div>;
-  }
+  const { id } = await params;
 
   const db = await connectDB();
 
@@ -22,107 +19,127 @@ export default async function InvoicePage({ params }: any) {
   );
 
   if (!invoice.length) {
-    return <div className="p-10 text-red-500">Invoice not found</div>;
+    return <div className="p-10 text-red-500">Invalid Invoice</div>;
   }
 
-  const data = invoice[0];
+  const inv = invoice[0];
 
   return (
-    <div className="bg-white p-10 text-gray-800 print:p-0">
-      <div className="max-w-3xl mx-auto">
+    <div className="bg-gray-200 min-h-screen p-4 print:bg-white">
+
+      <div className="max-w-4xl mx-auto bg-white p-6 shadow print:shadow-none print-container compact">
 
         {/* HEADER */}
-        <h1 className="text-4xl font-bold tracking-widest mb-4">
-          PAYMENT
-        </h1>
-
-        <div className="flex justify-between text-sm mb-6">
+        <div className="flex justify-between items-start">
           <div>
-            <p>NO: {data.invoice_no}</p>
-            <p>DATE: {data.date}</p>
+            <h1 className="text-4xl font-bold tracking-wide">PAYMENT</h1>
+
+            <p className="text-xs mt-1">NO: {inv.invoice_no}</p>
+            <p className="text-xs">DATE: {inv.date}</p>
+
+            <div className="h-1 w-24 bg-green-400 mt-2"></div>
+          </div>
+
+          <img src="/logo.png" className="w-16 h-16" />
+        </div>
+
+        {/* CLIENT */}
+        <div className="grid grid-cols-2 mt-4 text-sm">
+          <div>
+            <p className="text-gray-500">TO:</p>
+            <p className="font-semibold">{inv.client_name}</p>
           </div>
 
           <div className="text-right">
             <p className="text-gray-500">COMPANY:</p>
-            <p className="font-semibold">{data.company_name}</p>
+            <p className="font-semibold">{inv.company_name}</p>
           </div>
         </div>
 
-        {/* CLIENT */}
-        <div className="mb-6">
-          <p className="text-gray-500 text-sm">TO:</p>
-          <p className="font-semibold">{data.client_name}</p>
-        </div>
+        {/* ITEMS TABLE */}
+        <div className="mt-4">
 
-        {/* TABLE */}
-        <div className="mt-6">
-          <div className="flex justify-between text-gray-500 text-sm mb-2">
-            <span>DESCRIPTION</span>
-            <span>AMOUNT</span>
+          <div className="grid grid-cols-4 text-xs font-bold border-b pb-1">
+            <span>Description</span>
+            <span className="text-center">Qty</span>
+            <span className="text-right">Price</span>
+            <span className="text-right">Amount</span>
           </div>
 
           {items.map((item: any) => (
-            <div
-              key={item.id}
-              className="flex justify-between py-1"
-            >
+            <div key={item.id} className="grid grid-cols-4 text-xs py-1">
+
               <span>{item.description}</span>
-              <span>INR {item.amount}</span>
+
+              <span className="text-center">
+                {item.quantity}
+              </span>
+
+              <span className="text-right">
+                ₹ {item.price}
+              </span>
+
+              <span className="text-right">
+                ₹ {(item.quantity * item.price).toFixed(2)}
+              </span>
+
             </div>
           ))}
+
         </div>
 
-        {/* TOTAL BOX */}
-        <div className="mt-6 border rounded-lg p-4">
-          <div className="flex justify-between">
-            <span>TOTAL</span>
-            <span>INR {data.total}</span>
-          </div>
+        {/* TOTAL */}
+        <div className="mt-4 flex justify-end">
+          <div className="w-52 text-xs">
 
-          <div className="flex justify-between text-gray-500">
-            <span>CONCESSION</span>
-            <span>- INR {data.discount}</span>
-          </div>
+            <div className="flex justify-between">
+              <span>Subtotal</span>
+              <span>₹ {inv.subtotal}</span>
+            </div>
 
-          <div className="flex justify-between font-bold text-lg mt-2">
-            <span>TOTAL</span>
-            <span>INR {data.final_total}</span>
+            <div className="flex justify-between">
+              <span>Discount</span>
+              <span>₹ {inv.discount}</span>
+            </div>
+
+            <hr className="my-1" />
+
+            <div className="flex justify-between font-bold text-sm">
+              <span>Total</span>
+              <span>₹ {inv.final_total}</span>
+            </div>
+
           </div>
         </div>
 
-        {/* AMOUNT IN WORDS */}
-        <p className="mt-4 text-sm italic text-center">
-          Amount in words (add converter later)
-        </p>
-
-        {/* PAYMENT METHOD */}
-        <div className="mt-6 text-sm">
-          <p className="font-semibold">PAYMENT METHOD</p>
+        {/* PAYMENT */}
+        <div className="mt-3 text-xs">
+          <p className="font-bold">PAYMENT METHOD</p>
           <p>Cash / Online</p>
         </div>
 
-        {/* BANK DETAILS */}
-        <div className="mt-6 text-sm">
-          <p>A/c Holder Name: {data.company_name}</p>
-          <p>A/c No: XXXXXXXX</p>
-          <p>(Account Type: Current Account)</p>
-          <p>IFSC: XXXXXXXX</p>
-          <p className="font-semibold">ICICI Bank, Varanasi</p>
-        </div>
+        {/* BANK */}
+        <div className="grid grid-cols-2 mt-4 text-xs no-break">
 
-        {/* SIGNATURE */}
-        <div className="mt-16 flex justify-between">
-          <div></div>
-
-          <div className="text-center">
-            <p className="text-sm">RECEIVED BY</p>
-            <div className="border-t mt-6 w-40"></div>
-            <p className="text-xs mt-1">Signature & Date</p>
+          <div>
+            <p><b>A/c Holder:</b> Humanomics Pvt Ltd</p>
+            <p><b>A/c:</b> 386905001972</p>
+            <p><b>IFSC:</b> ICIC0003869</p>
+            <p>ICICI Bank, Varanasi</p>
           </div>
+
+          <div className="text-right">
+            <p className="font-bold">RECEIVED BY</p>
+
+            <div className="mt-6 border-t w-28 ml-auto"></div>
+
+            <p className="text-[10px] mt-1">Signature</p>
+          </div>
+
         </div>
 
         {/* PRINT BUTTON */}
-        <div className="print:hidden mt-10">
+        <div className="mt-4 print:hidden">
           <PrintButton />
         </div>
 

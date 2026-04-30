@@ -1,35 +1,75 @@
-import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
-import { InvoiceData } from "@/types/invoice";
+import { generateInvoiceNumber } from "@/lib/utils";
 
 export async function POST(req: Request) {
-  const body: InvoiceData = await req.json();
-  const db = await connectDB();
+  try {
+    const body = await req.json();
 
-  const total = body.items.reduce((sum, i) => sum + Number(i.amount), 0);
-  const finalTotal = total - Number(body.discount);
+    const {
+      invoiceNo,
+      date,
+      clientName,
+      companyName,
+      items,
+      discount,
+    } = body;
 
-  const [result]: any = await db.execute(
-    "INSERT INTO invoices (invoice_no, date, client_name, company_name, total, discount, final_total) VALUES (?, ?, ?, ?, ?, ?, ?)",
-    [
-      body.invoiceNo,
-      body.date,
-      body.clientName,
-      body.companyName,
-      total,
-      body.discount,
-      finalTotal,
-    ]
-  );
+    // Calculations (SAFE)
+    const subtotal =
+      items?.reduce(
+        (sum: number, item: any) =>
+          sum + (item.quantity || 0) * (item.price || 0),
+        0
+      ) || 0;
 
-  const invoiceId = result.insertId;
+    const discountAmount = (subtotal * (discount || 0)) / 100;
+    const finalTotal = subtotal - discountAmount;
 
-  for (let item of body.items) {
-    await db.execute(
-      "INSERT INTO invoice_items (invoice_id, description, amount) VALUES (?, ?, ?)",
-      [invoiceId, item.description, item.amount]
+    const db = await connectDB();
+
+    const finalInvoiceNo = invoiceNo || generateInvoiceNumber();
+
+    // INSERT INVOICE
+    const [result]: any = await db.execute(
+      `INSERT INTO invoices 
+      (invoice_no, date, client_name, company_name, subtotal, discount, final_total)
+      VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [
+        finalInvoiceNo || null,
+        date || null,
+        clientName || null,
+        companyName || null,
+        subtotal ?? 0,
+        discount ?? 0,
+        finalTotal ?? 0,
+      ]
+    );
+
+    const invoiceId = result.insertId;
+
+    // INSERT ITEMS
+    for (const item of items || []) {
+      await db.execute(
+        `INSERT INTO invoice_items 
+        (invoice_id, description, quantity, price)
+        VALUES (?, ?, ?, ?)`,
+        [
+          invoiceId,
+          item.description || "",
+          item.quantity ?? 1,
+          item.price ?? 0,
+        ]
+      );
+    }
+
+    return Response.json({ id: invoiceId });
+
+  } catch (error: any) {
+    console.error("API ERROR:", error);
+
+    return Response.json(
+      { error: error.message || "Something went wrong" },
+      { status: 500 }
     );
   }
-
-  return NextResponse.json({ id: invoiceId });
 }
