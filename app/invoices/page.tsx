@@ -1,6 +1,9 @@
+// app/invoices/page.tsx
 import Link from "next/link";
 import { connectDB } from "@/lib/db";
 import DeleteButton from "../components/DeleteButton";
+
+export const dynamic = 'force-dynamic';
 
 export default async function InvoicesPage() {
   const db = await connectDB();
