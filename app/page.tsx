@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function Home() {
@@ -14,23 +14,6 @@ export default function Home() {
     discount: 0,
     items: [{ description: "", quantity: 1, price: 0 }],
   });
-
-  const [invoices, setInvoices] = useState<any[]>([]);
-
-  // 🔹 LOAD ALL INVOICES
-  useEffect(() => {
-    fetchInvoices();
-  }, []);
-
-  const fetchInvoices = async () => {
-    try {
-      const res = await fetch("/api/invoices");
-      const data = await res.json();
-      setInvoices(data);
-    } catch (err) {
-      console.error(err);
-    }
-  };
 
   const addItem = () => {
     setForm({
@@ -73,9 +56,6 @@ export default function Home() {
         throw new Error(data.error);
       }
 
-      // refresh list
-      fetchInvoices();
-
       router.push(`/invoice/${data.id}`);
     } catch (err) {
       console.error(err);
@@ -86,11 +66,22 @@ export default function Home() {
   return (
     <div className="p-8 max-w-5xl mx-auto space-y-8">
 
-      {/* 🔥 CREATE FORM */}
-      <div className="card p-6">
-        <h1 className="text-3xl font-bold text-[#ef9815] mb-4">
+      {/* 🔥 HEADER WITH BUTTON */}
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold text-[#ef9815]">
           Create Invoice
         </h1>
+
+        <button
+          onClick={() => router.push("/invoices")}
+          className="btn-primary"
+        >
+          All Invoices
+        </button>
+      </div>
+
+      {/* 🔥 FORM */}
+      <div className="card p-6">
 
         <input
           placeholder="Invoice No (optional)"
@@ -182,46 +173,8 @@ export default function Home() {
         <button onClick={handleSubmit} className="btn-primary w-full mt-4">
           Save Invoice
         </button>
+
       </div>
-
-      {/* 🔥 INVOICE LIST */}
-      <div className="card p-6">
-        <h2 className="text-2xl font-bold mb-4">All Invoices</h2>
-
-        {invoices.length === 0 ? (
-          <p className="text-gray-500">No invoices found</p>
-        ) : (
-          <div className="space-y-3">
-            {invoices.map((inv) => (
-              <div
-                key={inv.id}
-                className="flex justify-between items-center border p-3 rounded hover:bg-gray-50"
-              >
-                <div>
-                  <p className="font-semibold">{inv.invoice_no}</p>
-                  <p className="text-sm text-gray-500">
-                    {inv.client_name}
-                  </p>
-                </div>
-
-                <div className="flex gap-3">
-                  <span className="font-bold">
-                    ₹ {inv.final_total}
-                  </span>
-
-                  <button
-                    onClick={() => router.push(`/invoice/${inv.id}`)}
-                    className="text-[#ef9815] font-semibold"
-                  >
-                    View
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
     </div>
   );
 }

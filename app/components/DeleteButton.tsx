@@ -1,43 +1,23 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-
-export default function DeleteButton({ id }: { id: number }) {
-  const router = useRouter();
-
+export default function DeleteButton({ id, onDelete }: any) {
   const handleDelete = async () => {
-    const confirmDelete = confirm("Are you sure you want to delete this invoice?");
+    const confirmDelete = confirm("Delete this invoice?");
 
     if (!confirmDelete) return;
 
-    try {
-      const res = await fetch("/api/invoice/delete", {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json", // ✅ IMPORTANT
-        },
-        body: JSON.stringify({ id }),
-      });
+    await fetch(`/api/invoice/${id}`, {
+      method: "DELETE",
+    });
 
-      const data = await res.json();
-      console.log("DELETE RESPONSE:", data);
-
-      if (data.success) {
-        alert("Invoice deleted successfully");
-        router.refresh(); // refresh list
-      } else {
-        alert("Delete failed");
-      }
-
-    } catch (error) {
-      console.error("DELETE ERROR:", error);
-    }
+    // 🔥 notify parent
+    onDelete(id);
   };
 
   return (
     <button
       onClick={handleDelete}
-      className="text-red-500 font-semibold hover:underline ml-3"
+      className="text-red-500 ml-3 font-semibold"
     >
       Delete
     </button>
