@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "BC Invoice Builder",
-  description: "Generated for Beggars Corporation.",
+  description: "Developed for Beggars Corporation.",
 };
 
 export default function RootLayout({
