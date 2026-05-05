@@ -15,6 +15,7 @@ export default function Home() {
     items: [{ description: "", quantity: 1, price: 0 }],
   });
 
+  // ➕ ADD ITEM
   const addItem = () => {
     setForm({
       ...form,
@@ -22,13 +23,22 @@ export default function Home() {
     });
   };
 
+  // ❌ REMOVE ITEM
+  const removeItem = (index: number) => {
+    if (form.items.length === 1) return; // prevent removing last item
+
+    const updated = form.items.filter((_, i) => i !== index);
+    setForm({ ...form, items: updated });
+  };
+
+  // ✏️ UPDATE ITEM
   const handleItemChange = (i: number, field: string, value: any) => {
     const items = [...form.items];
     items[i] = { ...items[i], [field]: value };
     setForm({ ...form, items });
   };
 
-  // CALCULATIONS
+  // 💰 CALCULATIONS
   const subtotal = form.items.reduce(
     (sum, item) => sum + item.quantity * item.price,
     0
@@ -37,7 +47,7 @@ export default function Home() {
   const discountAmount = (subtotal * form.discount) / 100;
   const finalTotal = subtotal - discountAmount;
 
-  // SUBMIT
+  // 🚀 SUBMIT
   const handleSubmit = async () => {
     try {
       const res = await fetch("/api/invoice", {
@@ -66,7 +76,7 @@ export default function Home() {
   return (
     <div className="p-8 max-w-5xl mx-auto space-y-8">
 
-      {/* 🔥 HEADER WITH BUTTON */}
+      {/* 🔥 HEADER */}
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold text-[#ef9815]">
           Create Invoice
@@ -80,8 +90,8 @@ export default function Home() {
         </button>
       </div>
 
-      {/* 🔥 FORM */}
-      <div className="card p-6">
+      {/* 🔥 FORM CARD */}
+      <div className="card p-6 space-y-4">
 
         <input
           placeholder="Invoice No (optional)"
@@ -107,10 +117,14 @@ export default function Home() {
           onChange={(e) => setForm({ ...form, companyName: e.target.value })}
         />
 
+        {/* 🧾 ITEMS */}
         <h2 className="font-bold mt-4">Items</h2>
 
         {form.items.map((item, i) => (
-          <div key={i} className="grid grid-cols-3 gap-2">
+          <div
+            key={i}
+            className="grid grid-cols-4 gap-2 items-center"
+          >
             <input
               placeholder="Description"
               className="input"
@@ -118,6 +132,7 @@ export default function Home() {
                 handleItemChange(i, "description", e.target.value)
               }
             />
+
             <input
               type="number"
               placeholder="Qty"
@@ -126,6 +141,7 @@ export default function Home() {
                 handleItemChange(i, "quantity", Number(e.target.value))
               }
             />
+
             <input
               type="number"
               placeholder="Price"
@@ -134,6 +150,15 @@ export default function Home() {
                 handleItemChange(i, "price", Number(e.target.value))
               }
             />
+
+            {/* ❌ REMOVE BUTTON */}
+            <button
+                onClick={() => removeItem(i)}
+                disabled={form.items.length === 1}
+                className="flex items-center justify-center w-10 h-10 rounded-lg border border-red-200 text-red-500 hover:bg-red-50 hover:border-red-400 transition disabled:opacity-40"
+              >
+                ✕
+              </button>
           </div>
         ))}
 
@@ -141,6 +166,7 @@ export default function Home() {
           + Add Item
         </button>
 
+        {/* 💸 DISCOUNT */}
         <input
           type="number"
           placeholder="Discount (%)"
@@ -150,14 +176,14 @@ export default function Home() {
           }
         />
 
-        {/* PREVIEW */}
+        {/* 📊 PREVIEW */}
         <div className="card mt-6">
           <h2 className="font-bold text-xl mb-2">Preview</h2>
 
           {form.items.map((item, i) => (
             <div key={i} className="flex justify-between text-sm">
               <span>
-                {item.description} (x{item.quantity})
+                {item.description || "Item"} (x{item.quantity})
               </span>
               <span>₹ {item.quantity * item.price}</span>
             </div>
@@ -167,9 +193,10 @@ export default function Home() {
 
           <p>Subtotal: ₹ {subtotal}</p>
           <p>Discount: ₹ {discountAmount}</p>
-          <p className="font-bold">Total: ₹ {finalTotal}</p>
+          <p className="font-bold text-lg">Total: ₹ {finalTotal}</p>
         </div>
 
+        {/* 🚀 SAVE BUTTON */}
         <button onClick={handleSubmit} className="btn-primary w-full mt-4">
           Save Invoice
         </button>
