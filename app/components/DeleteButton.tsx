@@ -1,24 +1,34 @@
 "use client";
 
 export default function DeleteButton({ id, onDelete }: any) {
+
   const handleDelete = async () => {
-    const confirmDelete = confirm("Delete this invoice?");
+    if (!confirm("Delete this invoice?")) return;
 
-    if (!confirmDelete) return;
+    try {
+      const res = await fetch(`/api/invoice/delete`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id }),
+      });
 
-    await fetch(`/api/invoice/${id}`, {
-      method: "DELETE",
-    });
+      const data = await res.json();
 
-    // 🔥 notify parent
-    onDelete(id);
+      if (!res.ok) {
+        throw new Error(data.error || "Delete failed");
+      }
+
+      onDelete(id); // update UI
+
+    } catch (err: any) {
+      alert(err.message);
+    }
   };
 
   return (
-    <button
-      onClick={handleDelete}
-      className="text-red-500 ml-3 font-semibold"
-    >
+    <button onClick={handleDelete} className="text-red-500 ml-3">
       Delete
     </button>
   );
