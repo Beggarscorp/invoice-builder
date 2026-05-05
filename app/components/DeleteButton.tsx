@@ -28,7 +28,7 @@ export default function DeleteButton({ id, onDelete }: any) {
   };
 
   return (
-    <button onClick={handleDelete} className="text-red-500 ml-3">
+    <button onClick={handleDelete} className="text-red-500 ml-3 cursor-pointer">
       Delete
     </button>
   );

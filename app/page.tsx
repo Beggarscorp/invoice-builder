@@ -87,7 +87,7 @@ export default function Home() {
 
         <button
           onClick={() => router.push("/invoices")}
-          className="btn-primary"
+          className="btn-primary cursor-pointer"
         >
           All Invoices
         </button>
@@ -184,7 +184,7 @@ export default function Home() {
 
                   <button
                     onClick={() => removeItem(i)}
-                    className="w-8 h-8 flex items-center justify-center rounded-md border hover:bg-red-50 text-gray-500 hover:text-red-500"
+                    className="cursor-pointer w-8 h-8 flex items-center justify-center rounded-md border hover:bg-red-50 text-gray-500 hover:text-red-500"
                   >
                     ✕
                   </button>
@@ -193,7 +193,7 @@ export default function Home() {
             })}
           </div>
 
-          <button onClick={addItem} className="btn-primary mt-3">
+          <button onClick={addItem} className="btn-primary mt-3 cursor-pointer">
             + Add Item
           </button>
         </div>
@@ -226,7 +226,7 @@ export default function Home() {
           <p className="text-lg font-bold">Total: ₹ {finalTotal}</p>
         </div>
 
-        <button onClick={handleSubmit} className="btn-primary w-full">
+        <button onClick={handleSubmit} className="btn-primary w-full cursor-pointer">
           Save Invoice
         </button>
 
